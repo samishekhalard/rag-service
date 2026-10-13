@@ -1,0 +1,22 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+      - name: Tests
+        run: pytest
+      - name: Offline evaluation
+        run: python -m eval.run --variants fake,fake-norerank
+      - name: README numbers must trace to a recorded run
+        run: python scripts/check_readme_numbers.py

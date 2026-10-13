@@ -1,0 +1,79 @@
+# Evaluation set for the sample corpus in data/sample.
+#
+# relevant_docs holds document ids (file stems), not chunk ids — see the note
+# at the top of eval/metrics.py for why.
+#
+# must_include is a list of strings the answer should contain. Keep them short
+# and factual (a number, a code, a term); long phrases measure wording rather
+# than correctness.
+#
+# answerable: false marks a question the corpus genuinely cannot answer. A
+# correct system refuses. Without these cases an eval set rewards confident
+# guessing, which is the failure mode that matters most in production.
+
+- id: dry-run-threshold
+  question: What suction pressure triggers a dry run fault and how fast does it act?
+  relevant_docs: [alarms]
+  must_include: ["0.4", "F-101"]
+
+- id: stage-up-delay
+  question: How long must the lead pump run near full speed before another pump stages in?
+  relevant_docs: [controller-overview]
+  must_include: ["30"]
+
+- id: hunting-cause
+  question: What causes the hunting alarm and does it stop the station?
+  relevant_docs: [alarms, controller-overview]
+  must_include: ["F-530"]
+
+- id: sensor-band
+  question: What milliamp range counts as a valid transmitter reading?
+  relevant_docs: [controller-overview, alarms]
+  must_include: ["3.6", "20.4"]
+
+- id: firmware-file
+  question: What must the firmware update file be called and how should the USB stick be formatted?
+  relevant_docs: [maintenance]
+  must_include: ["vx7.fw", "FAT32"]
+
+- id: opcua-port
+  question: Which port does the OPC UA server listen on and what does it need to be enabled?
+  relevant_docs: [networking]
+  must_include: ["4840", "licence"]
+
+- id: mqtt-commands
+  question: Can the controller be commanded over MQTT?
+  relevant_docs: [networking]
+  must_include: ["publish-only"]
+
+- id: config-restore
+  question: Can a configuration backup be restored onto a different unit?
+  relevant_docs: [maintenance]
+  must_include: ["hardware revision"]
+
+- id: seal-interval
+  question: How often should mechanical seals be inspected?
+  relevant_docs: [maintenance]
+  must_include: ["8000"]
+
+- id: overpressure-limit
+  question: What is the default overpressure limit?
+  relevant_docs: [alarms]
+  must_include: ["16"]
+
+- id: duty-rotation
+  question: How does the controller decide which pump leads after a restart?
+  relevant_docs: [controller-overview]
+  must_include: ["fewest"]
+
+# --- deliberately unanswerable -------------------------------------------
+
+- id: price
+  question: How much does a Vertex-7 controller cost?
+  relevant_docs: []
+  answerable: false
+
+- id: motor-winding
+  question: What is the winding resistance of the pump motor?
+  relevant_docs: []
+  answerable: false

@@ -1,0 +1,39 @@
+# Defaults for the RAG service.
+# Every key here is overridable by an RAG_<KEY> environment variable,
+# so this file holds choices, not secrets. Keys live in .env.
+
+provider: cloud
+
+cloud_base_url: https://api.openai.com/v1
+cloud_embed_model: text-embedding-3-small
+cloud_chat_model: gpt-4o-mini
+
+ollama_base_url: http://localhost:11434
+ollama_embed_model: nomic-embed-text
+ollama_chat_model: llama3.1:8b
+
+qdrant_url: http://localhost:6333
+qdrant_collection: documents
+
+# Retrieval. dense_top_k and sparse_top_k are deliberately wider than
+# rerank_top_n: fusion needs candidates to work with, the reranker cuts
+# them down. Narrowing the candidate pool is the usual reason a reranker
+# appears to do nothing.
+chunk_size: 800
+chunk_overlap: 120
+dense_top_k: 20
+sparse_top_k: 20
+rrf_k: 60
+rerank_top_n: 5
+rerank: true
+
+langfuse_host: http://localhost:3000
+
+# USD per 1M tokens. Update when provider pricing changes — the eval
+# table reports cost per query from these numbers.
+price_embed_per_mtok: 0.02
+price_input_per_mtok: 0.15
+price_output_per_mtok: 0.60
+
+max_context_chars: 6000
+request_timeout_s: 60.0

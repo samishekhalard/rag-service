@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+
+# Secrets
+.env
+
+# Qdrant local storage, if the server is run outside Docker
+qdrant_storage/
+
+# NOTE: results/ is deliberately NOT ignored.
+# The README quotes numbers from results/EVAL.md and
+# scripts/check_readme_numbers.py verifies them against results/raw/*.json.
+# Ignoring them would leave the README's claims unverifiable from a clone.
+
+# OS / IDE
+.DS_Store
+.vscode/
+.idea/

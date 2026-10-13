@@ -1,0 +1,14 @@
+qdrant-client>=1.12
+rank-bm25>=0.2.2
+fastapi>=0.115
+uvicorn[standard]>=0.30
+pydantic-settings>=2.4
+PyYAML>=6.0
+httpx>=0.27
+
+# Optional: tracing is mirrored to Langfuse when keys are set. The service
+# runs without it — see src/rag/tracing.py.
+langfuse>=2.50
+
+# Tests
+pytest>=8.0
