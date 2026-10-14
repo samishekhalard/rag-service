@@ -84,6 +84,8 @@ docker compose exec ollama ollama pull llama3.1:8b
 | `POST /ingest` | Index raw text or a path on the server |
 | `POST /query` | Retrieve and generate; returns answer, sources and the trace |
 | `POST /retrieve` | Retrieval only — no generation, no generation cost |
+| `GET /chunks/{id}` | One chunk with its neighbours, for reading around a hit |
+| `GET /documents/{id}` | Every chunk of one document, in order |
 | `GET /stats` | Index size and active configuration |
 | `GET /health` | Liveness |
 
@@ -216,7 +218,7 @@ scripts/
 pytest
 ```
 
-51 tests, no container and no keys required — they run against an in-process
+56 tests, no container and no keys required — they run against an in-process
 Qdrant with the deterministic embedder, exercising the same code path as
 production.
 

@@ -74,3 +74,47 @@ def test_stats_exposes_the_active_configuration(client):
     stats = client.get("/stats").json()
     assert stats["provider"] == "fake"
     assert "reranker" in stats
+
+
+def test_chunk_lookup_returns_neighbours(client):
+    client.post(
+        "/ingest",
+        json={
+            "doc_id": "manual",
+            "text": "\n\n".join(f"Paragraph number {i} about pumps and valves." for i in range(8)),
+        },
+    )
+    hit = client.post("/retrieve", json={"question": "pumps and valves"}).json()["chunks"][0]
+
+    payload = client.get(f"/chunks/{hit['chunk_id']}", params={"context": 1}).json()
+    assert payload["chunk_id"] == hit["chunk_id"]
+    ordinals = [c["ordinal"] for c in payload["chunks"]]
+    assert ordinals == sorted(ordinals)
+    assert payload["ordinal"] in ordinals
+
+
+def test_chunk_lookup_clamps_context(client):
+    client.post("/ingest", json={"doc_id": "d", "text": "Only one short chunk here."})
+    hit = client.post("/retrieve", json={"question": "short chunk"}).json()["chunks"][0]
+    payload = client.get(f"/chunks/{hit['chunk_id']}", params={"context": 99}).json()
+    assert payload["context"] == 5
+
+
+def test_unknown_chunk_id_is_404_not_a_crash(client):
+    assert client.get("/chunks/" + "a" * 32).status_code == 404
+    assert client.get("/chunks/not-a-digest").status_code == 404
+
+
+def test_document_endpoint_returns_chunks_in_order(client):
+    client.post(
+        "/ingest",
+        json={"doc_id": "ordered", "text": "\n\n".join(f"Section {i} text." for i in range(6))},
+    )
+    payload = client.get("/documents/ordered").json()
+    assert payload["doc_id"] == "ordered"
+    ordinals = [c["ordinal"] for c in payload["chunks"]]
+    assert ordinals == sorted(ordinals)
+
+
+def test_unknown_document_is_404(client):
+    assert client.get("/documents/nope").status_code == 404

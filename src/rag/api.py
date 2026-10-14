@@ -111,6 +111,49 @@ def query(request: QueryRequest) -> QueryResponse:
     )
 
 
+@app.get("/chunks/{chunk_id}")
+def get_chunk(chunk_id: str, context: int = 1) -> dict:
+    """
+    One chunk by id, with `context` neighbouring chunks either side.
+
+    Retrieval returns truncated passages; this is how a caller reads around a
+    hit without re-running the query. `context` is clamped to 0-5.
+    """
+    pipeline = get_pipeline()
+    chunk = pipeline.store.get(chunk_id)
+    if chunk is None:
+        raise HTTPException(404, f"no chunk with id {chunk_id}")
+
+    context = max(0, min(5, context))
+    siblings = pipeline.store.by_document(chunk.doc_id)
+    low, high = chunk.ordinal - context, chunk.ordinal + context
+    window = [c for c in siblings if low <= c.ordinal <= high]
+    return {
+        "chunk_id": chunk.id,
+        "doc_id": chunk.doc_id,
+        "ordinal": chunk.ordinal,
+        "document_chunks": len(siblings),
+        "context": context,
+        "chunks": [
+            {"chunk_id": c.id, "ordinal": c.ordinal, "text": c.text} for c in window
+        ],
+    }
+
+
+@app.get("/documents/{doc_id}")
+def get_document(doc_id: str) -> dict:
+    """Every chunk of one document, in reading order."""
+    chunks = get_pipeline().store.by_document(doc_id)
+    if not chunks:
+        raise HTTPException(404, f"no document with id {doc_id}")
+    return {
+        "doc_id": doc_id,
+        "chunks": [
+            {"chunk_id": c.id, "ordinal": c.ordinal, "text": c.text} for c in chunks
+        ],
+    }
+
+
 @app.post("/retrieve", response_model=RetrieveResponse)
 def retrieve(request: QueryRequest) -> RetrieveResponse:
     outcome = get_pipeline().retrieve(request.question)

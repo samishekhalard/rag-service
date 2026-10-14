@@ -121,6 +121,33 @@ class VectorStore:
                 break
         return chunks
 
+    def get(self, chunk_id: str) -> Chunk | None:
+        """Exact lookup by chunk id. Returns None when the id is unknown."""
+        try:
+            point_id = _point_id(chunk_id)
+        except ValueError:
+            # Not a 32-char hex digest, so it cannot be one of our ids.
+            return None
+        points = self.client.retrieve(
+            collection_name=self.collection, ids=[point_id], with_payload=True
+        )
+        if not points:
+            return None
+        payload = points[0].payload
+        return Chunk(
+            id=payload["chunk_id"],
+            doc_id=payload["doc_id"],
+            ordinal=payload["ordinal"],
+            text=payload["text"],
+            metadata=payload.get("metadata") or {},
+        )
+
+    def by_document(self, doc_id: str) -> list[Chunk]:
+        """Every chunk of one document, in reading order."""
+        chunks = [c for c in self.all_chunks() if c.doc_id == doc_id]
+        chunks.sort(key=lambda c: c.ordinal)
+        return chunks
+
     def count(self) -> int:
         return int(self.client.count(collection_name=self.collection, exact=True).count)
 
