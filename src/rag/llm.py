@@ -54,7 +54,11 @@ class CloudChat:
                     {"role": "system", "content": system},
                     {"role": "user", "content": user},
                 ],
-                "temperature": 0,
+                **(
+                    {}
+                    if self.settings.cloud_temperature is None
+                    else {"temperature": self.settings.cloud_temperature}
+                ),
             },
             timeout=self.settings.request_timeout_s,
         )
@@ -153,13 +157,14 @@ class ExtractiveChat:
 
 
 def build_chat(settings: Settings) -> ChatModel:
-    if settings.provider == "fake":
+    provider = settings.resolved_chat_provider
+    if provider == "fake":
         return ExtractiveChat()
-    if settings.provider == "local":
+    if provider == "local":
         return OllamaChat(settings)
     if not settings.cloud_api_key:
         raise RuntimeError(
-            "provider is 'cloud' but RAG_CLOUD_API_KEY is empty. "
-            "Set the key, or use RAG_PROVIDER=local for Ollama."
+            "chat is set to 'cloud' but RAG_CLOUD_API_KEY is empty. "
+            "Set the key, or use RAG_CHAT_PROVIDER=local for Ollama."
         )
     return CloudChat(settings)

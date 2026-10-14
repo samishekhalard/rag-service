@@ -139,5 +139,31 @@ def test_switching_rerank_off_changes_nothing_else(pipeline):
 def test_stats_reports_configuration(pipeline):
     stats = pipeline.stats()
     assert stats["chunks"] == pipeline.store.count()
-    assert stats["provider"] == "fake"
+    assert stats["embed_provider"] == "fake"
+    assert stats["chat_provider"] == "fake"
     assert stats["tracing"] == "local-only"
+
+
+def test_providers_can_be_split():
+    """
+    The Claude API has no embeddings endpoint, so a Claude setup must embed
+    elsewhere. The pipeline has to allow that split without any other change.
+    """
+    settings = load_settings(
+        provider="fake", embed_provider="fake", chat_provider="fake",
+        qdrant_url=":memory:", qdrant_collection="split",
+    )
+    assert settings.resolved_embed_provider == "fake"
+    assert settings.resolved_chat_provider == "fake"
+
+    hybrid = load_settings(provider="cloud", embed_provider="local")
+    assert hybrid.resolved_embed_provider == "local"
+    assert hybrid.resolved_chat_provider == "cloud"
+    assert hybrid.embed_model == hybrid.ollama_embed_model
+    assert hybrid.chat_model == hybrid.cloud_chat_model
+
+
+def test_temperature_is_omitted_when_unset():
+    """Claude 4.7+ rejects temperature below 1, so the field must be omittable."""
+    assert load_settings(cloud_temperature=None).cloud_temperature is None
+    assert load_settings().cloud_temperature == 0.0

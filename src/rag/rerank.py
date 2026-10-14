@@ -172,6 +172,6 @@ class LLMReranker:
 def build_reranker(settings: Settings, chat=None) -> Reranker:
     if not settings.rerank:
         return IdentityReranker()
-    if settings.provider == "fake" or chat is None:
+    if settings.resolved_chat_provider == "fake" or chat is None:
         return LexicalReranker()
     return LLMReranker(chat, settings)

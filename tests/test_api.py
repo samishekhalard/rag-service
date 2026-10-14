@@ -72,7 +72,8 @@ def test_empty_question_is_rejected(client):
 
 def test_stats_exposes_the_active_configuration(client):
     stats = client.get("/stats").json()
-    assert stats["provider"] == "fake"
+    assert stats["embed_provider"] == "fake"
+    assert stats["chat_provider"] == "fake"
     assert "reranker" in stats
 
 

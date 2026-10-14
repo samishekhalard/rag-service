@@ -2,7 +2,13 @@
 Configuration for the RAG service.
 
 One switch decides where embeddings and generation happen: `provider`.
-Set it to "cloud" (OpenAI-compatible HTTP API) or "local" (Ollama). Nothing
+It can be split: `embed_provider` and `chat_provider` override it separately,
+which is what you need for Anthropic — the Claude API has no embeddings
+endpoint, so embeddings must come from OpenAI, Voyage or a local model while
+generation goes to Claude.
+
+Each is set to "cloud" (any OpenAI-compatible HTTP API) or "local" (Ollama).
+Nothing
 else in the codebase branches on the provider — everything downstream talks
 to the Embedder and ChatModel protocols in embeddings.py and llm.py.
 
@@ -36,11 +42,19 @@ class Settings(BaseSettings):
     # --- provider switch ------------------------------------------------
     # "fake" is for tests: deterministic embeddings, no network, no keys.
     provider: Provider = "cloud"
+    # Leave these unset to follow `provider`. Set one to split the pipeline,
+    # e.g. embed_provider="local", chat_provider="cloud" with the cloud
+    # base URL pointed at Claude.
+    embed_provider: Provider | None = None
+    chat_provider: Provider | None = None
 
     cloud_base_url: str = "https://api.openai.com/v1"
     cloud_api_key: str = ""
     cloud_embed_model: str = "text-embedding-3-small"
     cloud_chat_model: str = "gpt-4o-mini"
+    # Some providers reject temperature below their default — Claude 4.7 and
+    # later return 400 for anything under 1 — so None omits the field entirely.
+    cloud_temperature: float | None = 0.0
 
     ollama_base_url: str = "http://localhost:11434"
     ollama_embed_model: str = "nomic-embed-text"
@@ -80,20 +94,36 @@ class Settings(BaseSettings):
     extra: dict = Field(default_factory=dict)
 
     @property
+    def resolved_embed_provider(self) -> Provider:
+        return self.embed_provider or self.provider
+
+    @property
+    def resolved_chat_provider(self) -> Provider:
+        return self.chat_provider or self.provider
+
+    @property
     def embed_model(self) -> str:
-        return self.cloud_embed_model if self.provider == "cloud" else self.ollama_embed_model
+        if self.resolved_embed_provider == "cloud":
+            return self.cloud_embed_model
+        if self.resolved_embed_provider == "local":
+            return self.ollama_embed_model
+        return "fake"
 
     @property
     def chat_model(self) -> str:
-        return self.cloud_chat_model if self.provider == "cloud" else self.ollama_chat_model
+        if self.resolved_chat_provider == "cloud":
+            return self.cloud_chat_model
+        if self.resolved_chat_provider == "local":
+            return self.ollama_chat_model
+        return "extractive"
 
     @property
     def variant(self) -> str:
         """Short label for this configuration, used as the eval row key."""
-        if self.provider == "fake":
+        if self.resolved_chat_provider == "fake" and self.resolved_embed_provider == "fake":
             return "fake"
         suffix = "+rerank" if self.rerank else "-rerank"
-        return f"{self.provider}:{self.chat_model}{suffix}"
+        return f"{self.resolved_embed_provider}/{self.resolved_chat_provider}:{self.chat_model}{suffix}"
 
 
 def load_settings(path: Path | None = None, **overrides) -> Settings:

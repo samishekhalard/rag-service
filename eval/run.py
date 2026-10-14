@@ -54,6 +54,12 @@ VARIANTS: dict[str, dict] = {
     "cloud-norerank": {"provider": "cloud", "rerank": False},
     "local": {"provider": "local"},
     "local-norerank": {"provider": "local", "rerank": False},
+    # Claude has no embeddings endpoint: embed locally with Ollama, generate
+    # and rerank with Claude through its OpenAI-compatible layer. Point
+    # RAG_CLOUD_BASE_URL at https://api.anthropic.com/v1/ and set
+    # RAG_CLOUD_CHAT_MODEL plus RAG_CLOUD_TEMPERATURE=null.
+    "claude": {"provider": "cloud", "embed_provider": "local"},
+    "claude-norerank": {"provider": "cloud", "embed_provider": "local", "rerank": False},
 }
 
 

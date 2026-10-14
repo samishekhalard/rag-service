@@ -126,13 +126,15 @@ class OllamaEmbedder:
 
 
 def build_embedder(settings: Settings) -> Embedder:
-    if settings.provider == "fake":
+    provider = settings.resolved_embed_provider
+    if provider == "fake":
         return FakeEmbedder()
-    if settings.provider == "local":
+    if provider == "local":
         return OllamaEmbedder(settings)
     if not settings.cloud_api_key:
         raise RuntimeError(
-            "provider is 'cloud' but RAG_CLOUD_API_KEY is empty. "
-            "Set the key, or use RAG_PROVIDER=local for Ollama."
+            "embeddings are set to 'cloud' but RAG_CLOUD_API_KEY is empty. "
+            "Set the key, or use RAG_EMBED_PROVIDER=local for Ollama. "
+            "Note the Claude API has no embeddings endpoint."
         )
     return CloudEmbedder(settings)
