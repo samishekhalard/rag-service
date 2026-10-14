@@ -80,8 +80,12 @@ def check(path: Path, allowed: set[str], required: bool) -> list[str]:
 
     problems: list[str] = []
     for block in blocks:
-        # Skip fenced code: commands and config samples are not claims.
+        # Skip code: commands, config samples and identifiers are not claims.
+        # Inline spans matter as much as fenced ones — `qwen2.5:7b` is a model
+        # name, and reading "2.5" out of it as an unverified figure is a false
+        # positive that pressures you to stop naming things precisely.
         without_code = re.sub(r"```.*?```", "", block, flags=re.S)
+        without_code = re.sub(r"`[^`]*`", "", without_code)
         # Skip the placeholder rows of an unfilled table.
         for token in NUMBER.findall(without_code):
             normalised = token.replace(",", ".")

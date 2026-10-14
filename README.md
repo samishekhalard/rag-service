@@ -125,59 +125,72 @@ cloning this repo without keys.
 
 <!-- numbers:start -->
 
-Sample corpus: 4 documents, 13 eval cases, 11 of them answerable, `k = 5`.
-Produced by `python -m eval.run`; full table in `results/EVAL.md`.
+Sample corpus: 4 documents, 12 chunks, 13 eval cases, 11 of them answerable,
+`k = 5`. Produced by `python -m eval.run`; full table in `results/EVAL.md`.
 
-| Variant | hit@5 ↑ | nDCG@5 ↑ | MRR ↑ | keyword coverage ↑ | p50 ms ↓ | USD / query ↓ |
-|---|---|---|---|---|---|---|
-| offline (`fake`) | 0.909 | 0.802 | 0.758 | 0.500 | 2.0 | 0.000000 |
-| offline, no rerank | 1.000 | 0.914 | 0.894 | 0.500 | 1.6 | 0.000000 |
-| cloud | — | — | — | — | — | — |
-| cloud, no rerank | — | — | — | — | — | — |
-| local (Ollama) | — | — | — | — | — | — |
+| Variant | hit@5 ↑ | nDCG@5 ↑ | MRR ↑ | coverage ↑ | refusal ↑ | p50 ms ↓ | USD / query ↓ |
+|---|---|---|---|---|---|---|---|
+| local, rerank | 1.000 | 0.966 | 0.955 | 0.818 | 1.000 | 10203.6 | 0.000000 |
+| local, no rerank | 1.000 | 0.966 | 0.955 | 0.818 | 1.000 | 2267.6 | 0.000000 |
+| offline, rerank | 0.909 | 0.802 | 0.758 | 0.500 | 0.000 | 2.0 | 0.000000 |
+| offline, no rerank | 1.000 | 0.914 | 0.894 | 0.500 | 0.000 | 1.6 | 0.000000 |
+| cloud | — | — | — | — | — | — | — |
 
-The two offline rows are real measurements of the `fake` provider: a
-deterministic hash embedder, BM25, RRF and a lexical reranker, with an
-extractive reader standing in for generation. They establish the floor —
-whatever a real embedding model and a real LLM add, they have to beat this.
+**local** is Ollama end to end: `nomic-embed-text` for embeddings,
+`qwen2.5:7b` for generation and for the reranker. **offline** is the `fake`
+provider — a deterministic hash embedder and a sentence-extracting reader —
+which needs no model at all and is what CI runs. The cloud row is empty
+because it has not been run; `scripts/check_readme_numbers.py` fails the build
+if any figure here is absent from `results/raw/`.
 
-The cloud and local rows are empty because they have not been run. Filling
-them needs a key or a local model; the command is above. **No number appears
-in this README until a run produces it** — `scripts/check_readme_numbers.py`
-fails the build if any figure here is absent from `results/raw/`.
+### What a real model changes
 
-### What the offline rows already show
+**It can refuse, and the stand-in cannot.** Refusal rate goes from 0.000 to
+1.000: `qwen2.5:7b` declined both questions the corpus genuinely cannot answer
+("The context provided does not contain any information about the cost of a
+Vertex-7 controller"), where the extractive reader always returns its best
+sentences no matter how irrelevant. Keyword coverage rises the same way,
+0.500 to 0.818.
 
-**Reranking is not free, and here it is not obviously positive.** It costs
-0.5 ms of the 2.0 ms median query and moves hit@5 *down*, from 1.000 to 0.909,
-while leaving answer quality unchanged — keyword coverage is 0.500 either way.
+**Groundedness falls, 1.000 to 0.809, and that is the metric working.** A
+sentence-copier cannot use a word the context did not supply, so it scores a
+perfect 1.000 by construction. A real model paraphrases. Read groundedness as
+"did the answer introduce vocabulary from nowhere", not as a quality score —
+below roughly 0.5 would be worth investigating; 0.809 is a model writing
+normally.
 
-Before reading anything into that: the hit@5 difference is **one case out of
-eleven** (`duty-rotation`). Eleven cases cannot resolve a nine-point
-difference. The honest conclusion is that this eval set is too small to judge
-the reranker, and the next thing to do is grow the eval set, not tune the
-reranker.
+### What the reranker is worth here: nothing, at three quarters of the latency
 
-**Keyword coverage of 0.500 is a property of the offline reader, not of
-retrieval.** Groundedness is 1.000 — every word of every answer came from the
-retrieved context — while coverage sits at half, because the extractive
-stand-in returns the best-matching sentence and the one after it, and several
-eval cases require two facts from further apart. Retrieval found the right
-document in 10 of 11 cases; the stand-in simply cannot compose. That gap is
-what a real generator is for, and it is why the cloud and local rows matter.
+The two local rows are identical on every retrieval metric to four decimals,
+and identical on coverage. The reranker is not broken — it reordered 2 of the
+13 cases, leaving 11 untouched — but the two changes cancelled out:
 
-**Cost is 0.000000 because nothing was billed.** Only the halves of the
-pipeline that hit a paid API are charged, and the offline provider hits none.
-The two halves are priced separately too, so embedding on a local model while
-generating with a cloud one charges for generation alone — which is the
-arrangement the Claude API forces, since it has no embeddings endpoint.
+- `duty-rotation`: promoted `controller-overview`, which is the right
+  document. An improvement.
+- `config-restore`: promoted `alarms` over `maintenance`, which is the right
+  one. A regression.
 
-**The time goes where you would not guess.** Median per stage, offline:
-embed 0.1 ms, dense search 0.8 ms, sparse search 0.2 ms, fusion 0.0 ms,
-rerank 0.5 ms, generate 0.3 ms. With a real model, generation will dominate
-everything else by two orders of magnitude — which is exactly why the
-`/retrieve` endpoint exists, so retrieval can be tuned without paying for
-generation on every iteration.
+For that, it costs 7480.2 ms of a 10203.6 ms median query — more than twice
+what generation itself costs (2781.9 ms), and the reason p50 drops to
+2267.6 ms without it. A listwise prompt over 20 candidates is simply a bigger
+prompt than the one that writes the answer.
+
+The honest conclusion is not "reranking is useless" but "this corpus cannot
+show its value": fusion alone already retrieves the right document for every
+case (hit@5 1.000, MRR 0.955), so there is nothing left to fix. Reranking
+earns its latency when retrieval is imperfect, and here retrieval is not.
+
+### Retrieval has saturated — the eval set is now the bottleneck
+
+hit@5 and recall@5 are both 1.000 with a real embedding model. Four documents
+and 13 questions can no longer separate any two configurations, which is why
+the differences above come down to single cases. Growing the eval set is the
+next piece of work, not tuning anything.
+
+Note the offline rows disagree with the local ones about the reranker: there
+it *lowered* hit@5 from 1.000 to 0.909. That was also one case. Two runs, two
+directions, both inside the noise of a 13-case set — which is the clearest
+argument for a bigger one.
 
 <!-- numbers:end -->
 
@@ -185,17 +198,21 @@ generation on every iteration.
 
 Stated plainly, because they affect how much the table above is worth.
 
-- **The corpus is four short synthetic documents.** It is a fixture for
-  exercising the pipeline, not a workload. Numbers from it predict nothing
-  about a real corpus of thousands of documents, where recall degrades and
-  the reranker usually starts earning its place.
+- **The corpus is four short synthetic documents, and retrieval has saturated
+  on it.** hit@5 and recall@5 are both 1.000 with a real embedding model, so
+  the fixture can no longer separate two configurations. Numbers from it
+  predict nothing about a corpus of thousands of documents, where recall
+  degrades and reranking starts to matter.
 - **Thirteen eval cases is too few**, as the reranker comparison above
-  demonstrates. Differences smaller than roughly one case — nine points — are
-  noise.
-- **The offline provider cannot refuse.** The extractive reader always returns
-  its best sentences, so `refusal_rate` is 0.000 for both offline rows. That
-  number measures the stand-in, not the system; it becomes meaningful only
-  with a real generator.
+  demonstrates: every difference in the table traces back to one or two
+  individual cases.
+- **Local latency is one machine's.** The local rows were measured on an
+  Apple Silicon laptop running the model through Ollama. They describe that
+  machine, not the architecture — treat the ratio between stages as the
+  transferable part, not the absolute milliseconds.
+- **Groundedness is not a quality score.** A sentence-copier scores 1.000 by
+  construction and a real model scores lower for paraphrasing. It detects
+  vocabulary that came from nowhere, nothing more.
 - **Cost for local models is API spend, which is zero.** It says nothing about
   the hardware the model runs on or the electricity it consumes.
 - **No reranking cross-encoder.** The LLM reranker is a listwise prompt, which
