@@ -21,6 +21,7 @@ Settings come from, in order of precedence:
 
 from __future__ import annotations
 
+import os
 from pathlib import Path
 from typing import Literal
 
@@ -127,11 +128,30 @@ class Settings(BaseSettings):
 
 
 def load_settings(path: Path | None = None, **overrides) -> Settings:
-    """Load YAML defaults, then let env vars and explicit overrides win."""
+    """
+    Load configuration with the documented precedence:
+
+        explicit arguments > environment variables > default.yaml > defaults
+
+    The subtlety: pydantic-settings ranks constructor arguments *above*
+    environment variables. Passing every YAML value as a constructor argument
+    therefore made YAML beat the environment, so any key present in
+    default.yaml could never be overridden by an RAG_* variable — including
+    RAG_QDRANT_URL, which docker-compose sets to reach the qdrant container.
+    The containerised service would have dialled localhost instead.
+
+    So YAML values are dropped here for keys the environment already supplies,
+    letting pydantic-settings read those from the environment as intended.
+    """
     base: dict = {}
     config_path = path or CONFIG_PATH
     if config_path.exists():
         loaded = yaml.safe_load(config_path.read_text(encoding="utf-8")) or {}
-        base = {k: v for k, v in loaded.items() if v is not None}
+        prefix = Settings.model_config["env_prefix"]
+        base = {
+            key: value
+            for key, value in loaded.items()
+            if value is not None and f"{prefix}{key}".upper() not in os.environ
+        }
     base.update(overrides)
     return Settings(**base)
