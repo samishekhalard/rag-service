@@ -167,3 +167,32 @@ def test_temperature_is_omitted_when_unset():
     """Claude 4.7+ rejects temperature below 1, so the field must be omittable."""
     assert load_settings(cloud_temperature=None).cloud_temperature is None
     assert load_settings().cloud_temperature == 0.0
+
+
+def test_local_models_are_not_billed():
+    """
+    A local model bills nothing. Charging the configured prices for it would
+    report spend that never happened — and the offline eval rows would carry
+    a cost that is simply fictional.
+    """
+    from rag.tracing import cost_usd
+
+    local = load_settings(provider="local")
+    assert cost_usd(local, embed_tokens=10_000, tokens_in=50_000, tokens_out=5_000) == 0.0
+
+    fake = load_settings(provider="fake")
+    assert cost_usd(fake, embed_tokens=10_000, tokens_in=50_000, tokens_out=5_000) == 0.0
+
+
+def test_hybrid_setup_bills_only_the_cloud_half():
+    """Embedding on Ollama while generating with Claude charges generation only."""
+    from rag.tracing import cost_usd
+
+    hybrid = load_settings(provider="cloud", embed_provider="local")
+    charged = cost_usd(hybrid, embed_tokens=1_000_000, tokens_in=1_000_000, tokens_out=0)
+    assert charged == hybrid.price_input_per_mtok
+
+    cloud = load_settings(provider="cloud")
+    assert cost_usd(cloud, embed_tokens=1_000_000, tokens_in=0, tokens_out=0) == (
+        cloud.price_embed_per_mtok
+    )

@@ -130,8 +130,8 @@ Produced by `python -m eval.run`; full table in `results/EVAL.md`.
 
 | Variant | hit@5 ↑ | nDCG@5 ↑ | MRR ↑ | keyword coverage ↑ | p50 ms ↓ | USD / query ↓ |
 |---|---|---|---|---|---|---|
-| offline (`fake`) | 0.909 | 0.802 | 0.758 | 0.500 | 2.1 | 0.000152 |
-| offline, no rerank | 1.000 | 0.914 | 0.894 | 0.500 | 1.5 | 0.000160 |
+| offline (`fake`) | 0.909 | 0.802 | 0.758 | 0.500 | 2.0 | 0.000000 |
+| offline, no rerank | 1.000 | 0.914 | 0.894 | 0.500 | 1.6 | 0.000000 |
 | cloud | — | — | — | — | — | — |
 | cloud, no rerank | — | — | — | — | — | — |
 | local (Ollama) | — | — | — | — | — | — |
@@ -149,7 +149,7 @@ fails the build if any figure here is absent from `results/raw/`.
 ### What the offline rows already show
 
 **Reranking is not free, and here it is not obviously positive.** It costs
-0.5 ms of the 2.1 ms median query and moves hit@5 *down*, from 1.000 to 0.909,
+0.5 ms of the 2.0 ms median query and moves hit@5 *down*, from 1.000 to 0.909,
 while leaving answer quality unchanged — keyword coverage is 0.500 either way.
 
 Before reading anything into that: the hit@5 difference is **one case out of
@@ -165,6 +165,12 @@ stand-in returns the best-matching sentence and the one after it, and several
 eval cases require two facts from further apart. Retrieval found the right
 document in 10 of 11 cases; the stand-in simply cannot compose. That gap is
 what a real generator is for, and it is why the cloud and local rows matter.
+
+**Cost is 0.000000 because nothing was billed.** Only the halves of the
+pipeline that hit a paid API are charged, and the offline provider hits none.
+The two halves are priced separately too, so embedding on a local model while
+generating with a cloud one charges for generation alone — which is the
+arrangement the Claude API forces, since it has no embeddings endpoint.
 
 **The time goes where you would not guess.** Median per stage, offline:
 embed 0.1 ms, dense search 0.8 ms, sparse search 0.2 ms, fusion 0.0 ms,

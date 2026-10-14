@@ -139,11 +139,25 @@ class Tracer:
 
 
 def cost_usd(settings: Settings, embed_tokens: int, tokens_in: int, tokens_out: int) -> float:
-    """Cost of one query in USD, from the prices in config."""
+    """
+    API spend for one query, in USD.
+
+    Only the halves that actually hit a paid API are charged. A local model
+    bills nothing, so applying the configured prices to it would report a
+    cost that was never incurred — and the two halves can use different
+    providers, so they are priced separately: embedding locally while
+    generating with a cloud model charges for generation alone.
+
+    This is API spend only. It says nothing about the hardware a local model
+    runs on, or the electricity it uses.
+    """
     million = 1_000_000
-    return round(
-        embed_tokens / million * settings.price_embed_per_mtok
-        + tokens_in / million * settings.price_input_per_mtok
-        + tokens_out / million * settings.price_output_per_mtok,
-        6,
-    )
+    total = 0.0
+    if settings.resolved_embed_provider == "cloud":
+        total += embed_tokens / million * settings.price_embed_per_mtok
+    if settings.resolved_chat_provider == "cloud":
+        total += (
+            tokens_in / million * settings.price_input_per_mtok
+            + tokens_out / million * settings.price_output_per_mtok
+        )
+    return round(total, 6)
