@@ -9,6 +9,7 @@ output marks the variant accordingly.
 
 from __future__ import annotations
 
+import math
 import re
 from dataclasses import dataclass
 from typing import Protocol
@@ -116,13 +117,38 @@ class ExtractiveChat:
 
     def complete(self, system: str, user: str) -> ChatReply:
         question, _, context = user.partition("\n\nContext:\n")
-        terms = set(re.findall(r"\w+", question.lower()))
+        # Only content words count. Scoring on raw token overlap lets "the",
+        # "is" and "what" decide the answer, so the longest sentence wins
+        # regardless of topic — which is exactly what happened before this
+        # filter existed, and what the integration test now pins.
+        terms = {t for t in re.findall(r"\w+", question.lower()) if len(t) > 3}
         sentences = [s.strip() for s in _SENTENCE.split(context) if s.strip()]
-        scored = sorted(
-            sentences,
-            key=lambda s: -len(terms & set(re.findall(r"\w+", s.lower()))),
-        )
-        text = " ".join(scored[:2]) if scored else "No relevant context found."
+        if not sentences:
+            return ChatReply(
+                text="No relevant context found.", tokens_in=_estimate(user),
+                tokens_out=8, estimated=True,
+            )
+
+        def score(sentence: str) -> float:
+            tokens = {t for t in re.findall(r"\w+", sentence.lower()) if len(t) > 3}
+            if not tokens or not terms:
+                return 0.0
+            # Normalised by sentence length so a long sentence cannot win on
+            # volume alone.
+            return len(terms & tokens) / math.sqrt(len(tokens))
+
+        scores = [score(s) for s in sentences]
+        best = max(range(len(sentences)), key=lambda i: (scores[i], -i))
+        if scores[best] == 0.0:
+            text = "No relevant context found."
+        else:
+            # Take the best sentence and the one after it. Technical prose
+            # states the subject in one sentence and the value in the next
+            # ("Fault F-310 overpressure. Discharge pressure exceeded 16 bar."),
+            # so the sentence that matches the question often does not hold
+            # the answer. Picking the two highest scorers instead returns two
+            # topic sentences and no value — which the integration test caught.
+            text = " ".join(sentences[best : best + 2])
         return ChatReply(text=text, tokens_in=_estimate(user), tokens_out=_estimate(text), estimated=True)
 
 

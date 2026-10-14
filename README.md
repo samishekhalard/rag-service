@@ -130,8 +130,8 @@ Produced by `python -m eval.run`; full table in `results/EVAL.md`.
 
 | Variant | hit@5 ↑ | nDCG@5 ↑ | MRR ↑ | keyword coverage ↑ | p50 ms ↓ | USD / query ↓ |
 |---|---|---|---|---|---|---|
-| offline (`fake`) | 0.909 | 0.802 | 0.758 | 0.727 | 1.9 | 0.000158 |
-| offline, no rerank | 1.000 | 0.914 | 0.894 | 0.636 | 1.4 | 0.000164 |
+| offline (`fake`) | 0.909 | 0.802 | 0.758 | 0.500 | 2.1 | 0.000152 |
+| offline, no rerank | 1.000 | 0.914 | 0.894 | 0.500 | 1.5 | 0.000160 |
 | cloud | — | — | — | — | — | — |
 | cloud, no rerank | — | — | — | — | — | — |
 | local (Ollama) | — | — | — | — | — | — |
@@ -149,18 +149,26 @@ fails the build if any figure here is absent from `results/raw/`.
 ### What the offline rows already show
 
 **Reranking is not free, and here it is not obviously positive.** It costs
-0.5 ms of the 1.9 ms median query and moves hit@5 *down*, from 1.000 to 0.909,
-while moving keyword coverage *up*, from 0.636 to 0.727.
+0.5 ms of the 2.1 ms median query and moves hit@5 *down*, from 1.000 to 0.909,
+while leaving answer quality unchanged — keyword coverage is 0.500 either way.
 
 Before reading anything into that: the hit@5 difference is **one case out of
-eleven** (`duty-rotation`), and the coverage difference is one case moving the
-other way. Eleven cases cannot resolve a nine-point difference. The honest
-conclusion is that this eval set is too small to judge the reranker, and the
-next thing to do is grow the eval set, not to tune the reranker.
+eleven** (`duty-rotation`). Eleven cases cannot resolve a nine-point
+difference. The honest conclusion is that this eval set is too small to judge
+the reranker, and the next thing to do is grow the eval set, not tune the
+reranker.
+
+**Keyword coverage of 0.500 is a property of the offline reader, not of
+retrieval.** Groundedness is 1.000 — every word of every answer came from the
+retrieved context — while coverage sits at half, because the extractive
+stand-in returns the best-matching sentence and the one after it, and several
+eval cases require two facts from further apart. Retrieval found the right
+document in 10 of 11 cases; the stand-in simply cannot compose. That gap is
+what a real generator is for, and it is why the cloud and local rows matter.
 
 **The time goes where you would not guess.** Median per stage, offline:
-embed 0.1 ms, dense search 0.7 ms, sparse search 0.2 ms, fusion 0.0 ms,
-rerank 0.5 ms, generate 0.4 ms. With a real model, generation will dominate
+embed 0.1 ms, dense search 0.8 ms, sparse search 0.2 ms, fusion 0.0 ms,
+rerank 0.5 ms, generate 0.3 ms. With a real model, generation will dominate
 everything else by two orders of magnitude — which is exactly why the
 `/retrieve` endpoint exists, so retrieval can be tuned without paying for
 generation on every iteration.
