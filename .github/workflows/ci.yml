@@ -16,7 +16,16 @@ jobs:
       - run: pip install -r requirements.txt
       - name: Tests
         run: pytest
-      - name: Offline evaluation
-        run: python -m eval.run --variants fake,fake-norerank
+      # Write to a scratch directory, NOT results/. The committed runs are
+      # measurements from a specific machine, and the README quotes their
+      # latencies; regenerating them on a CI runner overwrites those figures
+      # with this runner's hardware and makes the README's own numbers
+      # untraceable. This step proves the harness runs; it is not a new
+      # measurement.
+      - name: Offline evaluation runs end to end
+        run: python -m eval.run --variants fake,fake-norerank --out-dir "$RUNNER_TEMP/eval"
+
+      - name: Committed results are unchanged
+        run: git diff --exit-code results/
       - name: README numbers must trace to a recorded run
         run: python scripts/check_readme_numbers.py

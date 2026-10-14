@@ -206,6 +206,10 @@ Stated plainly, because they affect how much the table above is worth.
 - **Thirteen eval cases is too few**, as the reranker comparison above
   demonstrates: every difference in the table traces back to one or two
   individual cases.
+- **Every latency here is one machine's.** The offline rows were measured in
+  a container and the local rows on an Apple Silicon laptop. CI deliberately
+  writes its evaluation to a scratch directory rather than `results/`, so a
+  runner's hardware never overwrites a recorded measurement.
 - **Local latency is one machine's.** The local rows were measured on an
   Apple Silicon laptop running the model through Ollama. They describe that
   machine, not the architecture — treat the ratio between stages as the
