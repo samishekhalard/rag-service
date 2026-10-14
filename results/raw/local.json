@@ -1,0 +1,1218 @@
+{
+  "variant": "local",
+  "config": {
+    "provider": "local",
+    "embed_model": "nomic-embed-text",
+    "chat_model": "qwen2.5:7b",
+    "rerank": true,
+    "reranker": "llm",
+    "chunk_size": 800,
+    "dense_top_k": 20,
+    "sparse_top_k": 20,
+    "rerank_top_n": 5,
+    "retrieval_only": false
+  },
+  "summary": {
+    "cases": 13,
+    "hit@5": 1.0,
+    "recall@5": 1.0,
+    "precision@5": 0.4318,
+    "ndcg@5": 0.9664,
+    "mrr": 0.9545,
+    "latency_p50_ms": 10203.6,
+    "latency_p95_ms": 11072.5,
+    "cost_per_query_usd": 0.0,
+    "keyword_coverage": 0.8182,
+    "groundedness": 0.8086,
+    "refusal_rate": 1.0,
+    "stage_p50_ms": {
+      "embed": 22.0,
+      "search_dense": 2.4,
+      "search_sparse": 0.2,
+      "fuse": 0.0,
+      "rerank": 7480.2,
+      "generate": 2781.9
+    }
+  },
+  "cases": [
+    {
+      "id": "dry-run-threshold",
+      "question": "What suction pressure triggers a dry run fault and how fast does it act?",
+      "answerable": true,
+      "retrieved_chunk_docs": [
+        "alarms",
+        "alarms",
+        "controller-overview",
+        "controller-overview",
+        "controller-overview"
+      ],
+      "retrieved_docs": [
+        "alarms",
+        "controller-overview"
+      ],
+      "latency_ms": 10683.98,
+      "cost_usd": 0.0,
+      "spans": [
+        {
+          "name": "embed",
+          "duration_ms": 14.65,
+          "tokens_in": 18,
+          "tokens_out": 0,
+          "metadata": {
+            "model": "nomic-embed-text"
+          }
+        },
+        {
+          "name": "search_dense",
+          "duration_ms": 5.91,
+          "tokens_in": 0,
+          "tokens_out": 0,
+          "metadata": {
+            "top_k": 20,
+            "hits": 12
+          }
+        },
+        {
+          "name": "search_sparse",
+          "duration_ms": 0.19,
+          "tokens_in": 0,
+          "tokens_out": 0,
+          "metadata": {
+            "top_k": 20,
+            "hits": 12
+          }
+        },
+        {
+          "name": "fuse",
+          "duration_ms": 0.08,
+          "tokens_in": 0,
+          "tokens_out": 0,
+          "metadata": {
+            "k": 60,
+            "candidates": 12,
+            "overlap": 12
+          }
+        },
+        {
+          "name": "rerank",
+          "duration_ms": 7214.41,
+          "tokens_in": 1309,
+          "tokens_out": 126,
+          "metadata": {
+            "reranker": "llm",
+            "returned": 5
+          }
+        },
+        {
+          "name": "generate",
+          "duration_ms": 3448.52,
+          "tokens_in": 889,
+          "tokens_out": 52,
+          "metadata": {
+            "model": "qwen2.5:7b"
+          }
+        }
+      ],
+      "retrieval": {
+        "hit@5": 1.0,
+        "recall@5": 1.0,
+        "precision@5": 0.5,
+        "ndcg@5": 1.0,
+        "mrr": 1.0
+      },
+      "answer": "The suction pressure that triggers a dry run fault stays below the dry-run threshold, which defaults to 0.4 bar, for longer than the dry-run delay, which defaults to 5 seconds. The controller stops all pumps immediately upon detecting this condition.",
+      "quality": {
+        "keyword_coverage": 0.5,
+        "groundedness": 0.8636363636363636
+      }
+    },
+    {
+      "id": "stage-up-delay",
+      "question": "How long must the lead pump run near full speed before another pump stages in?",
+      "answerable": true,
+      "retrieved_chunk_docs": [
+        "controller-overview",
+        "controller-overview",
+        "alarms",
+        "controller-overview",
+        "maintenance"
+      ],
+      "retrieved_docs": [
+        "controller-overview",
+        "alarms",
+        "maintenance"
+      ],
+      "latency_ms": 10393.28,
+      "cost_usd": 0.0,
+      "spans": [
+        {
+          "name": "embed",
+          "duration_ms": 22.18,
+          "tokens_in": 19,
+          "tokens_out": 0,
+          "metadata": {
+            "model": "nomic-embed-text"
+          }
+        },
+        {
+          "name": "search_dense",
+          "duration_ms": 1.32,
+          "tokens_in": 0,
+          "tokens_out": 0,
+          "metadata": {
+            "top_k": 20,
+            "hits": 12
+          }
+        },
+        {
+          "name": "search_sparse",
+          "duration_ms": 0.2,
+          "tokens_in": 0,
+          "tokens_out": 0,
+          "metadata": {
+            "top_k": 20,
+            "hits": 12
+          }
+        },
+        {
+          "name": "fuse",
+          "duration_ms": 0.04,
+          "tokens_in": 0,
+          "tokens_out": 0,
+          "metadata": {
+            "k": 60,
+            "candidates": 12,
+            "overlap": 12
+          }
+        },
+        {
+          "name": "rerank",
+          "duration_ms": 7189.04,
+          "tokens_in": 1310,
+          "tokens_out": 126,
+          "metadata": {
+            "reranker": "llm",
+            "returned": 5
+          }
+        },
+        {
+          "name": "generate",
+          "duration_ms": 3180.33,
+          "tokens_in": 835,
+          "tokens_out": 46,
+          "metadata": {
+            "model": "qwen2.5:7b"
+          }
+        }
+      ],
+      "retrieval": {
+        "hit@5": 1.0,
+        "recall@5": 1.0,
+        "precision@5": 0.3333333333333333,
+        "ndcg@5": 1.0,
+        "mrr": 1.0
+      },
+      "answer": "According to the context, the lead pump must run near full speed (above 92 percent of rated speed) for longer than the stage-up delay, which defaults to 30 seconds, before another pump stages in.",
+      "quality": {
+        "keyword_coverage": 1.0,
+        "groundedness": 0.7619047619047619
+      }
+    },
+    {
+      "id": "hunting-cause",
+      "question": "What causes the hunting alarm and does it stop the station?",
+      "answerable": true,
+      "retrieved_chunk_docs": [
+        "alarms",
+        "controller-overview",
+        "alarms",
+        "controller-overview",
+        "alarms"
+      ],
+      "retrieved_docs": [
+        "alarms",
+        "controller-overview"
+      ],
+      "latency_ms": 10203.62,
+      "cost_usd": 0.0,
+      "spans": [
+        {
+          "name": "embed",
+          "duration_ms": 24.3,
+          "tokens_in": 14,
+          "tokens_out": 0,
+          "metadata": {
+            "model": "nomic-embed-text"
+          }
+        },
+        {
+          "name": "search_dense",
+          "duration_ms": 2.39,
+          "tokens_in": 0,
+          "tokens_out": 0,
+          "metadata": {
+            "top_k": 20,
+            "hits": 12
+          }
+        },
+        {
+          "name": "search_sparse",
+          "duration_ms": 0.25,
+          "tokens_in": 0,
+          "tokens_out": 0,
+          "metadata": {
+            "top_k": 20,
+            "hits": 12
+          }
+        },
+        {
+          "name": "fuse",
+          "duration_ms": 0.05,
+          "tokens_in": 0,
+          "tokens_out": 0,
+          "metadata": {
+            "k": 60,
+            "candidates": 12,
+            "overlap": 12
+          }
+        },
+        {
+          "name": "rerank",
+          "duration_ms": 7132.39,
+          "tokens_in": 1306,
+          "tokens_out": 125,
+          "metadata": {
+            "reranker": "llm",
+            "returned": 5
+          }
+        },
+        {
+          "name": "generate",
+          "duration_ms": 3043.98,
+          "tokens_in": 810,
+          "tokens_out": 43,
+          "metadata": {
+            "model": "qwen2.5:7b"
+          }
+        }
+      ],
+      "retrieval": {
+        "hit@5": 1.0,
+        "recall@5": 1.0,
+        "precision@5": 1.0,
+        "ndcg@5": 1.0,
+        "mrr": 1.0
+      },
+      "answer": "The hunting alarm does not stop the station. It indicates that the stage-up and stage-down delays are too close together for the station's demand profile, causing the station to cycle a pump on and off repeatedly.",
+      "quality": {
+        "keyword_coverage": 0.0,
+        "groundedness": 0.8888888888888888
+      }
+    },
+    {
+      "id": "sensor-band",
+      "question": "What milliamp range counts as a valid transmitter reading?",
+      "answerable": true,
+      "retrieved_chunk_docs": [
+        "controller-overview",
+        "alarms",
+        "alarms",
+        "networking",
+        "maintenance"
+      ],
+      "retrieved_docs": [
+        "controller-overview",
+        "alarms",
+        "networking",
+        "maintenance"
+      ],
+      "latency_ms": 10914.45,
+      "cost_usd": 0.0,
+      "spans": [
+        {
+          "name": "embed",
+          "duration_ms": 27.35,
+          "tokens_in": 14,
+          "tokens_out": 0,
+          "metadata": {
+            "model": "nomic-embed-text"
+          }
+        },
+        {
+          "name": "search_dense",
+          "duration_ms": 1.53,
+          "tokens_in": 0,
+          "tokens_out": 0,
+          "metadata": {
+            "top_k": 20,
+            "hits": 12
+          }
+        },
+        {
+          "name": "search_sparse",
+          "duration_ms": 0.16,
+          "tokens_in": 0,
+          "tokens_out": 0,
+          "metadata": {
+            "top_k": 20,
+            "hits": 11
+          }
+        },
+        {
+          "name": "fuse",
+          "duration_ms": 0.03,
+          "tokens_in": 0,
+          "tokens_out": 0,
+          "metadata": {
+            "k": 60,
+            "candidates": 12,
+            "overlap": 11
+          }
+        },
+        {
+          "name": "rerank",
+          "duration_ms": 7544.68,
+          "tokens_in": 1306,
+          "tokens_out": 136,
+          "metadata": {
+            "reranker": "llm",
+            "returned": 5
+          }
+        },
+        {
+          "name": "generate",
+          "duration_ms": 3340.52,
+          "tokens_in": 798,
+          "tokens_out": 51,
+          "metadata": {
+            "model": "qwen2.5:7b"
+          }
+        }
+      ],
+      "retrieval": {
+        "hit@5": 1.0,
+        "recall@5": 1.0,
+        "precision@5": 0.5,
+        "ndcg@5": 1.0,
+        "mrr": 1.0
+      },
+      "answer": "A reading below 3.6 mA or above 20.4 mA is treated as a sensor fault rather than a process value. Therefore, the valid transmitter reading range is between 3.6 mA and 20.4 mA.",
+      "quality": {
+        "keyword_coverage": 1.0,
+        "groundedness": 0.8666666666666667
+      }
+    },
+    {
+      "id": "firmware-file",
+      "question": "What must the firmware update file be called and how should the USB stick be formatted?",
+      "answerable": true,
+      "retrieved_chunk_docs": [
+        "maintenance",
+        "maintenance",
+        "alarms",
+        "maintenance",
+        "networking"
+      ],
+      "retrieved_docs": [
+        "maintenance",
+        "alarms",
+        "networking"
+      ],
+      "latency_ms": 9453.74,
+      "cost_usd": 0.0,
+      "spans": [
+        {
+          "name": "embed",
+          "duration_ms": 22.5,
+          "tokens_in": 21,
+          "tokens_out": 0,
+          "metadata": {
+            "model": "nomic-embed-text"
+          }
+        },
+        {
+          "name": "search_dense",
+          "duration_ms": 1.84,
+          "tokens_in": 0,
+          "tokens_out": 0,
+          "metadata": {
+            "top_k": 20,
+            "hits": 12
+          }
+        },
+        {
+          "name": "search_sparse",
+          "duration_ms": 0.27,
+          "tokens_in": 0,
+          "tokens_out": 0,
+          "metadata": {
+            "top_k": 20,
+            "hits": 12
+          }
+        },
+        {
+          "name": "fuse",
+          "duration_ms": 0.05,
+          "tokens_in": 0,
+          "tokens_out": 0,
+          "metadata": {
+            "k": 60,
+            "candidates": 12,
+            "overlap": 12
+          }
+        },
+        {
+          "name": "rerank",
+          "duration_ms": 6765.61,
+          "tokens_in": 1311,
+          "tokens_out": 115,
+          "metadata": {
+            "reranker": "llm",
+            "returned": 5
+          }
+        },
+        {
+          "name": "generate",
+          "duration_ms": 2663.32,
+          "tokens_in": 778,
+          "tokens_out": 34,
+          "metadata": {
+            "model": "qwen2.5:7b"
+          }
+        }
+      ],
+      "retrieval": {
+        "hit@5": 1.0,
+        "recall@5": 1.0,
+        "precision@5": 0.3333333333333333,
+        "ndcg@5": 1.0,
+        "mrr": 1.0
+      },
+      "answer": "The firmware update file must be named `vx7.fw` and placed in the root of the USB stick. The USB stick should be formatted FAT32.",
+      "quality": {
+        "keyword_coverage": 1.0,
+        "groundedness": 0.9090909090909091
+      }
+    },
+    {
+      "id": "opcua-port",
+      "question": "Which port does the OPC UA server listen on and what does it need to be enabled?",
+      "answerable": true,
+      "retrieved_chunk_docs": [
+        "networking",
+        "networking",
+        "maintenance",
+        "maintenance",
+        "alarms"
+      ],
+      "retrieved_docs": [
+        "networking",
+        "maintenance",
+        "alarms"
+      ],
+      "latency_ms": 9672.12,
+      "cost_usd": 0.0,
+      "spans": [
+        {
+          "name": "embed",
+          "duration_ms": 19.69,
+          "tokens_in": 20,
+          "tokens_out": 0,
+          "metadata": {
+            "model": "nomic-embed-text"
+          }
+        },
+        {
+          "name": "search_dense",
+          "duration_ms": 1.16,
+          "tokens_in": 0,
+          "tokens_out": 0,
+          "metadata": {
+            "top_k": 20,
+            "hits": 12
+          }
+        },
+        {
+          "name": "search_sparse",
+          "duration_ms": 0.19,
+          "tokens_in": 0,
+          "tokens_out": 0,
+          "metadata": {
+            "top_k": 20,
+            "hits": 12
+          }
+        },
+        {
+          "name": "fuse",
+          "duration_ms": 0.03,
+          "tokens_in": 0,
+          "tokens_out": 0,
+          "metadata": {
+            "k": 60,
+            "candidates": 12,
+            "overlap": 12
+          }
+        },
+        {
+          "name": "rerank",
+          "duration_ms": 7200.39,
+          "tokens_in": 1312,
+          "tokens_out": 125,
+          "metadata": {
+            "reranker": "llm",
+            "returned": 5
+          }
+        },
+        {
+          "name": "generate",
+          "duration_ms": 2450.22,
+          "tokens_in": 829,
+          "tokens_out": 22,
+          "metadata": {
+            "model": "qwen2.5:7b"
+          }
+        }
+      ],
+      "retrieval": {
+        "hit@5": 1.0,
+        "recall@5": 1.0,
+        "precision@5": 0.3333333333333333,
+        "ndcg@5": 1.0,
+        "mrr": 1.0
+      },
+      "answer": "The OPC UA server listens on port 4840 and needs the integration license to be installed.",
+      "quality": {
+        "keyword_coverage": 0.5,
+        "groundedness": 0.625
+      }
+    },
+    {
+      "id": "mqtt-commands",
+      "question": "Can the controller be commanded over MQTT?",
+      "answerable": true,
+      "retrieved_chunk_docs": [
+        "networking",
+        "controller-overview",
+        "networking",
+        "maintenance",
+        "maintenance"
+      ],
+      "retrieved_docs": [
+        "networking",
+        "controller-overview",
+        "maintenance"
+      ],
+      "latency_ms": 10523.76,
+      "cost_usd": 0.0,
+      "spans": [
+        {
+          "name": "embed",
+          "duration_ms": 21.97,
+          "tokens_in": 10,
+          "tokens_out": 0,
+          "metadata": {
+            "model": "nomic-embed-text"
+          }
+        },
+        {
+          "name": "search_dense",
+          "duration_ms": 6.28,
+          "tokens_in": 0,
+          "tokens_out": 0,
+          "metadata": {
+            "top_k": 20,
+            "hits": 12
+          }
+        },
+        {
+          "name": "search_sparse",
+          "duration_ms": 0.22,
+          "tokens_in": 0,
+          "tokens_out": 0,
+          "metadata": {
+            "top_k": 20,
+            "hits": 12
+          }
+        },
+        {
+          "name": "fuse",
+          "duration_ms": 0.04,
+          "tokens_in": 0,
+          "tokens_out": 0,
+          "metadata": {
+            "k": 60,
+            "candidates": 12,
+            "overlap": 12
+          }
+        },
+        {
+          "name": "rerank",
+          "duration_ms": 7713.18,
+          "tokens_in": 1302,
+          "tokens_out": 125,
+          "metadata": {
+            "reranker": "llm",
+            "returned": 5
+          }
+        },
+        {
+          "name": "generate",
+          "duration_ms": 2781.89,
+          "tokens_in": 676,
+          "tokens_out": 40,
+          "metadata": {
+            "model": "qwen2.5:7b"
+          }
+        }
+      ],
+      "retrieval": {
+        "hit@5": 1.0,
+        "recall@5": 1.0,
+        "precision@5": 0.3333333333333333,
+        "ndcg@5": 1.0,
+        "mrr": 1.0
+      },
+      "answer": "No, the controller cannot be commanded over MQTT. The context explicitly states that MQTT is publish-only and does not support sending commands to the controller due to the lack of delivery guarantee suitable for control.",
+      "quality": {
+        "keyword_coverage": 1.0,
+        "groundedness": 0.6
+      }
+    },
+    {
+      "id": "config-restore",
+      "question": "Can a configuration backup be restored onto a different unit?",
+      "answerable": true,
+      "retrieved_chunk_docs": [
+        "alarms",
+        "maintenance",
+        "maintenance",
+        "maintenance",
+        "networking"
+      ],
+      "retrieved_docs": [
+        "alarms",
+        "maintenance",
+        "networking"
+      ],
+      "latency_ms": 11072.49,
+      "cost_usd": 0.0,
+      "spans": [
+        {
+          "name": "embed",
+          "duration_ms": 19.06,
+          "tokens_in": 15,
+          "tokens_out": 0,
+          "metadata": {
+            "model": "nomic-embed-text"
+          }
+        },
+        {
+          "name": "search_dense",
+          "duration_ms": 1.5,
+          "tokens_in": 0,
+          "tokens_out": 0,
+          "metadata": {
+            "top_k": 20,
+            "hits": 12
+          }
+        },
+        {
+          "name": "search_sparse",
+          "duration_ms": 0.17,
+          "tokens_in": 0,
+          "tokens_out": 0,
+          "metadata": {
+            "top_k": 20,
+            "hits": 10
+          }
+        },
+        {
+          "name": "fuse",
+          "duration_ms": 0.04,
+          "tokens_in": 0,
+          "tokens_out": 0,
+          "metadata": {
+            "k": 60,
+            "candidates": 12,
+            "overlap": 10
+          }
+        },
+        {
+          "name": "rerank",
+          "duration_ms": 7974.03,
+          "tokens_in": 1305,
+          "tokens_out": 135,
+          "metadata": {
+            "reranker": "llm",
+            "returned": 5
+          }
+        },
+        {
+          "name": "generate",
+          "duration_ms": 3077.4,
+          "tokens_in": 753,
+          "tokens_out": 42,
+          "metadata": {
+            "model": "qwen2.5:7b"
+          }
+        }
+      ],
+      "retrieval": {
+        "hit@5": 1.0,
+        "recall@5": 1.0,
+        "precision@5": 0.3333333333333333,
+        "ndcg@5": 0.6309297535714575,
+        "mrr": 0.5
+      },
+      "answer": "Yes, a configuration backup taken on one Vertex-7 can be restored to another unit of the same hardware revision. Restoring across hardware revisions is not possible due to differences in sensor scaling tables between revisions.",
+      "quality": {
+        "keyword_coverage": 1.0,
+        "groundedness": 0.8947368421052632
+      }
+    },
+    {
+      "id": "seal-interval",
+      "question": "How often should mechanical seals be inspected?",
+      "answerable": true,
+      "retrieved_chunk_docs": [
+        "maintenance",
+        "alarms",
+        "maintenance",
+        "networking",
+        "controller-overview"
+      ],
+      "retrieved_docs": [
+        "maintenance",
+        "alarms",
+        "networking",
+        "controller-overview"
+      ],
+      "latency_ms": 10079.61,
+      "cost_usd": 0.0,
+      "spans": [
+        {
+          "name": "embed",
+          "duration_ms": 23.49,
+          "tokens_in": 11,
+          "tokens_out": 0,
+          "metadata": {
+            "model": "nomic-embed-text"
+          }
+        },
+        {
+          "name": "search_dense",
+          "duration_ms": 3.7,
+          "tokens_in": 0,
+          "tokens_out": 0,
+          "metadata": {
+            "top_k": 20,
+            "hits": 12
+          }
+        },
+        {
+          "name": "search_sparse",
+          "duration_ms": 0.25,
+          "tokens_in": 0,
+          "tokens_out": 0,
+          "metadata": {
+            "top_k": 20,
+            "hits": 4
+          }
+        },
+        {
+          "name": "fuse",
+          "duration_ms": 0.07,
+          "tokens_in": 0,
+          "tokens_out": 0,
+          "metadata": {
+            "k": 60,
+            "candidates": 12,
+            "overlap": 4
+          }
+        },
+        {
+          "name": "rerank",
+          "duration_ms": 7584.24,
+          "tokens_in": 1302,
+          "tokens_out": 125,
+          "metadata": {
+            "reranker": "llm",
+            "returned": 5
+          }
+        },
+        {
+          "name": "generate",
+          "duration_ms": 2467.52,
+          "tokens_in": 816,
+          "tokens_out": 21,
+          "metadata": {
+            "model": "qwen2.5:7b"
+          }
+        }
+      ],
+      "retrieval": {
+        "hit@5": 1.0,
+        "recall@5": 1.0,
+        "precision@5": 0.25,
+        "ndcg@5": 1.0,
+        "mrr": 1.0
+      },
+      "answer": "Mechanical seals should be inspected every 8000 hours or annually, whichever comes first.",
+      "quality": {
+        "keyword_coverage": 1.0,
+        "groundedness": 0.8181818181818182
+      }
+    },
+    {
+      "id": "overpressure-limit",
+      "question": "What is the default overpressure limit?",
+      "answerable": true,
+      "retrieved_chunk_docs": [
+        "alarms",
+        "alarms",
+        "controller-overview",
+        "controller-overview",
+        "controller-overview"
+      ],
+      "retrieved_docs": [
+        "alarms",
+        "controller-overview"
+      ],
+      "latency_ms": 10537.91,
+      "cost_usd": 0.0,
+      "spans": [
+        {
+          "name": "embed",
+          "duration_ms": 35.03,
+          "tokens_in": 9,
+          "tokens_out": 0,
+          "metadata": {
+            "model": "nomic-embed-text"
+          }
+        },
+        {
+          "name": "search_dense",
+          "duration_ms": 5.28,
+          "tokens_in": 0,
+          "tokens_out": 0,
+          "metadata": {
+            "top_k": 20,
+            "hits": 12
+          }
+        },
+        {
+          "name": "search_sparse",
+          "duration_ms": 0.12,
+          "tokens_in": 0,
+          "tokens_out": 0,
+          "metadata": {
+            "top_k": 20,
+            "hits": 12
+          }
+        },
+        {
+          "name": "fuse",
+          "duration_ms": 0.04,
+          "tokens_in": 0,
+          "tokens_out": 0,
+          "metadata": {
+            "k": 60,
+            "candidates": 12,
+            "overlap": 12
+          }
+        },
+        {
+          "name": "rerank",
+          "duration_ms": 7593.33,
+          "tokens_in": 1302,
+          "tokens_out": 125,
+          "metadata": {
+            "reranker": "llm",
+            "returned": 5
+          }
+        },
+        {
+          "name": "generate",
+          "duration_ms": 2903.86,
+          "tokens_in": 882,
+          "tokens_out": 31,
+          "metadata": {
+            "model": "qwen2.5:7b"
+          }
+        }
+      ],
+      "retrieval": {
+        "hit@5": 1.0,
+        "recall@5": 1.0,
+        "precision@5": 0.5,
+        "ndcg@5": 1.0,
+        "mrr": 1.0
+      },
+      "answer": "The default overpressure limit is 16 bar. This can be inferred from the context where it states \"Default limit is 16 bar.\"",
+      "quality": {
+        "keyword_coverage": 1.0,
+        "groundedness": 0.6666666666666666
+      }
+    },
+    {
+      "id": "duty-rotation",
+      "question": "How does the controller decide which pump leads after a restart?",
+      "answerable": true,
+      "retrieved_chunk_docs": [
+        "controller-overview",
+        "maintenance",
+        "controller-overview",
+        "maintenance",
+        "alarms"
+      ],
+      "retrieved_docs": [
+        "controller-overview",
+        "maintenance",
+        "alarms"
+      ],
+      "latency_ms": 5495.52,
+      "cost_usd": 0.0,
+      "spans": [
+        {
+          "name": "embed",
+          "duration_ms": 17.62,
+          "tokens_in": 16,
+          "tokens_out": 0,
+          "metadata": {
+            "model": "nomic-embed-text"
+          }
+        },
+        {
+          "name": "search_dense",
+          "duration_ms": 2.61,
+          "tokens_in": 0,
+          "tokens_out": 0,
+          "metadata": {
+            "top_k": 20,
+            "hits": 12
+          }
+        },
+        {
+          "name": "search_sparse",
+          "duration_ms": 0.18,
+          "tokens_in": 0,
+          "tokens_out": 0,
+          "metadata": {
+            "top_k": 20,
+            "hits": 12
+          }
+        },
+        {
+          "name": "fuse",
+          "duration_ms": 0.04,
+          "tokens_in": 0,
+          "tokens_out": 0,
+          "metadata": {
+            "k": 60,
+            "candidates": 12,
+            "overlap": 12
+          }
+        },
+        {
+          "name": "rerank",
+          "duration_ms": 3268.18,
+          "tokens_in": 1306,
+          "tokens_out": 23,
+          "metadata": {
+            "reranker": "llm",
+            "returned": 5
+          }
+        },
+        {
+          "name": "generate",
+          "duration_ms": 2206.68,
+          "tokens_in": 766,
+          "tokens_out": 24,
+          "metadata": {
+            "model": "qwen2.5:7b"
+          }
+        }
+      ],
+      "retrieval": {
+        "hit@5": 1.0,
+        "recall@5": 1.0,
+        "precision@5": 0.3333333333333333,
+        "ndcg@5": 1.0,
+        "mrr": 1.0
+      },
+      "answer": "The controller selects the pump with the fewest accumulated hours as the next lead whenever the station restarts from idle.",
+      "quality": {
+        "keyword_coverage": 1.0,
+        "groundedness": 1.0
+      }
+    },
+    {
+      "id": "price",
+      "question": "How much does a Vertex-7 controller cost?",
+      "answerable": false,
+      "retrieved_chunk_docs": [
+        "controller-overview",
+        "maintenance",
+        "alarms",
+        "controller-overview",
+        "maintenance"
+      ],
+      "retrieved_docs": [
+        "controller-overview",
+        "maintenance",
+        "alarms"
+      ],
+      "latency_ms": 9654.84,
+      "cost_usd": 0.0,
+      "spans": [
+        {
+          "name": "embed",
+          "duration_ms": 18.98,
+          "tokens_in": 10,
+          "tokens_out": 0,
+          "metadata": {
+            "model": "nomic-embed-text"
+          }
+        },
+        {
+          "name": "search_dense",
+          "duration_ms": 1.22,
+          "tokens_in": 0,
+          "tokens_out": 0,
+          "metadata": {
+            "top_k": 20,
+            "hits": 12
+          }
+        },
+        {
+          "name": "search_sparse",
+          "duration_ms": 0.13,
+          "tokens_in": 0,
+          "tokens_out": 0,
+          "metadata": {
+            "top_k": 20,
+            "hits": 12
+          }
+        },
+        {
+          "name": "fuse",
+          "duration_ms": 0.05,
+          "tokens_in": 0,
+          "tokens_out": 0,
+          "metadata": {
+            "k": 60,
+            "candidates": 12,
+            "overlap": 12
+          }
+        },
+        {
+          "name": "rerank",
+          "duration_ms": 7480.16,
+          "tokens_in": 1304,
+          "tokens_out": 125,
+          "metadata": {
+            "reranker": "llm",
+            "returned": 5
+          }
+        },
+        {
+          "name": "generate",
+          "duration_ms": 2153.89,
+          "tokens_in": 782,
+          "tokens_out": 19,
+          "metadata": {
+            "model": "qwen2.5:7b"
+          }
+        }
+      ],
+      "answer": "The context provided does not contain any information about the cost of a Vertex-7 controller.",
+      "quality": {
+        "refused": 1.0
+      }
+    },
+    {
+      "id": "motor-winding",
+      "question": "What is the winding resistance of the pump motor?",
+      "answerable": false,
+      "retrieved_chunk_docs": [
+        "controller-overview",
+        "maintenance",
+        "controller-overview",
+        "networking",
+        "controller-overview"
+      ],
+      "retrieved_docs": [
+        "controller-overview",
+        "maintenance",
+        "networking"
+      ],
+      "latency_ms": 10174.7,
+      "cost_usd": 0.0,
+      "spans": [
+        {
+          "name": "embed",
+          "duration_ms": 20.24,
+          "tokens_in": 12,
+          "tokens_out": 0,
+          "metadata": {
+            "model": "nomic-embed-text"
+          }
+        },
+        {
+          "name": "search_dense",
+          "duration_ms": 2.76,
+          "tokens_in": 0,
+          "tokens_out": 0,
+          "metadata": {
+            "top_k": 20,
+            "hits": 12
+          }
+        },
+        {
+          "name": "search_sparse",
+          "duration_ms": 0.21,
+          "tokens_in": 0,
+          "tokens_out": 0,
+          "metadata": {
+            "top_k": 20,
+            "hits": 12
+          }
+        },
+        {
+          "name": "fuse",
+          "duration_ms": 0.06,
+          "tokens_in": 0,
+          "tokens_out": 0,
+          "metadata": {
+            "k": 60,
+            "candidates": 12,
+            "overlap": 12
+          }
+        },
+        {
+          "name": "rerank",
+          "duration_ms": 7975.4,
+          "tokens_in": 1304,
+          "tokens_out": 125,
+          "metadata": {
+            "reranker": "llm",
+            "returned": 5
+          }
+        },
+        {
+          "name": "generate",
+          "duration_ms": 2175.6,
+          "tokens_in": 811,
+          "tokens_out": 17,
+          "metadata": {
+            "model": "qwen2.5:7b"
+          }
+        }
+      ],
+      "answer": "The provided context does not contain information about the winding resistance of the pump motor.",
+      "quality": {
+        "refused": 1.0
+      }
+    }
+  ]
+}
